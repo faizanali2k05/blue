@@ -1,0 +1,8 @@
+{
+  "name": "Blue",
+  "description": "A cutting-edge AI-enhanced social media platform for seamless connection and creative expression, powered by Gemini.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
