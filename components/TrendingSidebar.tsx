@@ -22,37 +22,58 @@ const TrendingSidebar: React.FC = () => {
   }, []);
 
   return (
-    <div className="hidden lg:block w-80 h-screen sticky top-0 p-6 border-l border-slate-200 dark:border-slate-800 dark:bg-slate-950">
-      <div className="bg-slate-100 dark:bg-slate-900 rounded-[2rem] p-6 mb-6 border border-slate-200/50 dark:border-slate-800 transition-colors duration-300">
-        <h2 className="text-xl font-black mb-6 text-slate-900 dark:text-white tracking-tight">Trending</h2>
+    <div className="hidden lg:block w-[350px] h-screen sticky top-0 p-6 border-l border-slate-200 dark:border-slate-800 dark:bg-slate-950 no-scrollbar overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900/50 rounded-[2.5rem] p-7 mb-8 border border-slate-200/60 dark:border-slate-800 shadow-premium transition-all duration-500">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-[900] text-slate-900 dark:text-white tracking-tighter">What's Hot</h2>
+          <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
+        </div>
+
         {loading ? (
-          <div className="space-y-6 animate-pulse">
+          <div className="space-y-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="space-y-2">
-                <div className="h-2 w-16 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
-                <div className="h-4 w-32 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
-                <div className="h-3 w-48 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              <div key={i} className="space-y-3">
+                <div className="h-2 w-16 skeleton rounded-full opacity-50"></div>
+                <div className="h-5 w-40 skeleton rounded-lg"></div>
+                <div className="h-4 w-full skeleton rounded-lg opacity-70"></div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-10">
             {trends.map((trend, i) => (
               <div key={i} className="group cursor-pointer">
-                <p className="text-[10px] text-slate-500 dark:text-slate-500 font-black uppercase tracking-[0.1em] mb-1">Trending · Global</p>
-                <h3 className="font-extrabold text-slate-900 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors text-lg leading-tight">#{trend.topic.replace(/\s+/g, '')}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5 font-medium leading-relaxed">{trend.summary}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.15em]">
+                    {i === 0 ? '🔥 Breaking' : 'Technology · Trending'}
+                  </p>
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                    {Math.floor(Math.random() * 50 + 10)}k Posts
+                  </span>
+                </div>
+                
+                <h3 className="font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-all text-xl leading-tight">
+                  <span className="text-brand-500 mr-0.5">#</span>{trend.topic.replace(/\s+/g, '')}
+                </h3>
+                
+                <p className="text-[13px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-2 font-medium leading-relaxed group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors">
+                  {trend.summary}
+                </p>
+
                 {trend.links && trend.links.length > 0 && (
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  <div className="mt-3.5 flex flex-wrap gap-2">
                     {trend.links.map((link, idx) => (
                       <a 
                         key={idx}
                         href={link} 
                         target="_blank" 
                         rel="noreferrer" 
-                        className="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline truncate max-w-[140px] bg-brand-50 dark:bg-brand-950/30 px-2 py-0.5 rounded-md"
+                        className="flex items-center gap-1.5 text-[10px] font-black text-brand-600 dark:text-brand-400 hover:scale-105 transition-all bg-brand-50 dark:bg-brand-900/30 px-3 py-1.5 rounded-full border border-brand-100/50 dark:border-brand-900/50"
                       >
-                        {new URL(link).hostname}
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                        </svg>
+                        {new URL(link).hostname.replace('www.', '')}
                       </a>
                     ))}
                   </div>
@@ -63,22 +84,22 @@ const TrendingSidebar: React.FC = () => {
         )}
       </div>
 
-      <div className="bg-slate-100 dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-200/50 dark:border-slate-800 transition-colors duration-300">
-        <h2 className="text-xl font-black mb-6 text-slate-900 dark:text-white tracking-tight">Follow</h2>
-        <div className="space-y-6">
+      <div className="bg-white dark:bg-slate-900/50 rounded-[2.5rem] p-7 border border-slate-200/60 dark:border-slate-800 shadow-premium">
+        <h2 className="text-xl font-black mb-6 text-slate-900 dark:text-white tracking-tighter">Who to Follow</h2>
+        <div className="space-y-7">
           {[
-            { name: 'Gemini AI', handle: '@googleai', avatar: 'https://picsum.photos/id/1/100/100' },
-            { name: 'Blue Team', handle: '@teamblue', avatar: 'https://picsum.photos/id/2/100/100' }
+            { name: 'Gemini AI', handle: '@googleai', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=gemini' },
+            { name: 'Blue Team', handle: '@teamblue', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=blue' }
           ].map((u, i) => (
             <div key={i} className="flex items-center justify-between group">
-              <div className="flex items-center gap-3">
-                <img src={u.avatar} className="w-11 h-11 rounded-full ring-2 ring-white dark:ring-slate-800 transition-transform group-hover:scale-105" alt={u.name} />
+              <div className="flex items-center gap-3.5">
+                <img src={u.avatar} className="w-12 h-12 rounded-full ring-2 ring-slate-100 dark:ring-slate-800 transition-transform group-hover:scale-105 bg-slate-50 dark:bg-slate-800" alt={u.name} />
                 <div className="text-sm">
-                  <p className="font-extrabold text-slate-900 dark:text-slate-200">{u.name}</p>
-                  <p className="text-slate-500 dark:text-slate-500 font-medium">{u.handle}</p>
+                  <p className="font-extrabold text-slate-900 dark:text-white">{u.name}</p>
+                  <p className="text-slate-500 dark:text-slate-500 font-bold tracking-tight">{u.handle}</p>
                 </div>
               </div>
-              <button className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black px-5 py-2.5 rounded-full hover:scale-105 transition-all active:scale-95">
+              <button className="bg-slate-900 dark:bg-brand-500 text-white dark:text-white text-xs font-black px-6 py-2.5 rounded-full hover:scale-105 hover:bg-black dark:hover:bg-brand-600 transition-all active:scale-95 shadow-lg shadow-slate-200 dark:shadow-none">
                 Follow
               </button>
             </div>
@@ -86,12 +107,11 @@ const TrendingSidebar: React.FC = () => {
         </div>
       </div>
       
-      <div className="mt-8 px-4 text-[11px] text-slate-400 dark:text-slate-600 font-bold flex flex-wrap gap-x-4 gap-y-2 uppercase tracking-widest">
-        <span className="hover:text-slate-600 transition-colors cursor-pointer">Terms</span>
-        <span className="hover:text-slate-600 transition-colors cursor-pointer">Privacy</span>
-        <span className="hover:text-slate-600 transition-colors cursor-pointer">Cookies</span>
-        <span className="hover:text-slate-600 transition-colors cursor-pointer">Ads</span>
-        <span className="cursor-default">© 2024 Blue</span>
+      <div className="mt-10 px-6 text-[10px] text-slate-400 dark:text-slate-600 font-black flex flex-wrap gap-x-5 gap-y-3 uppercase tracking-[0.2em] mb-10">
+        <span className="hover:text-brand-500 transition-colors cursor-pointer">Terms</span>
+        <span className="hover:text-brand-500 transition-colors cursor-pointer">Privacy</span>
+        <span className="hover:text-brand-500 transition-colors cursor-pointer">Cookies</span>
+        <span className="cursor-default">© 2024 BLUE</span>
       </div>
     </div>
   );

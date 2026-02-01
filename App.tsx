@@ -39,7 +39,7 @@ const App: React.FC = () => {
     const savedSettings = localStorage.getItem('blue_settings');
     if (savedSettings) setSettings(JSON.parse(savedSettings));
 
-    setIsLoading(false);
+    setTimeout(() => setIsLoading(false), 800);
   }, []);
 
   // Save data to localStorage
@@ -122,7 +122,16 @@ const App: React.FC = () => {
     setIsImageGenerating(false);
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><div className="w-12 h-12 border-4 border-brand-600 border-t-transparent rounded-full animate-spin"></div></div>;
+  if (isLoading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="w-16 h-16 bg-brand-600 rounded-[1.5rem] flex items-center justify-center shadow-2xl animate-bounce mb-6">
+        <span className="text-white font-black text-3xl">B</span>
+      </div>
+      <div className="w-48 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-full bg-brand-500 w-1/2 animate-[shimmer_2s_infinite_linear] rounded-full"></div>
+      </div>
+    </div>
+  );
 
   if (!currentUser) return <Auth onLogin={handleLogin} />;
 
@@ -131,56 +140,56 @@ const App: React.FC = () => {
       case AppTab.HOME:
         return (
           <div className="flex flex-col dark:bg-slate-950">
-            <header className="sticky top-0 z-40 h-16 glass border-b border-slate-100 dark:border-slate-800 px-6 flex items-center justify-between">
-              <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">Home</h1>
-              <div className="md:hidden w-8 h-8 rounded-full overflow-hidden" onClick={() => setActiveTab(AppTab.PROFILE)}>
+            <header className="sticky top-0 z-40 h-[70px] glass border-b border-slate-100 dark:border-slate-800/50 px-8 flex items-center justify-between">
+              <h1 className="text-2xl font-[900] tracking-tighter text-slate-900 dark:text-white">Home</h1>
+              <div className="md:hidden w-10 h-10 rounded-xl overflow-hidden shadow-premium border-2 border-white dark:border-slate-800" onClick={() => setActiveTab(AppTab.PROFILE)}>
                 <img src={currentUser.avatar} alt="Me" className="w-full h-full object-cover" />
               </div>
             </header>
 
             {/* Post Composer */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
-              <div className="flex gap-4">
-                <img src={currentUser.avatar} className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800" alt="Me" />
+            <div className="p-8 border-b border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
+              <div className="flex gap-5">
+                <img src={currentUser.avatar} className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800 shadow-sm" alt="Me" />
                 <div className="flex-1">
                   <textarea
                     value={newPostText}
                     onChange={(e) => setNewPostText(e.target.value)}
-                    placeholder="What's happening in your world?"
-                    className="w-full bg-transparent border-none focus:ring-0 text-xl resize-none placeholder-slate-400 dark:placeholder-slate-600 min-h-[100px] dark:text-slate-100 font-medium"
+                    placeholder="What's your story?"
+                    className="w-full bg-transparent border-none focus:ring-0 text-xl resize-none placeholder-slate-400 dark:placeholder-slate-600 min-h-[120px] dark:text-slate-100 font-medium tracking-tight"
                   />
                   
                   {generatedImage && (
-                    <div className="relative mt-4 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-lg">
+                    <div className="relative mt-6 rounded-[2.5rem] overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-premium ring-4 ring-slate-50 dark:ring-slate-900">
                       <img src={generatedImage} alt="AI Generated" className="w-full h-auto" />
                       <button 
                         onClick={() => setGeneratedImage(null)}
-                        className="absolute top-4 right-4 p-2 bg-slate-900/40 backdrop-blur-md text-white rounded-full hover:bg-slate-900 transition-all active:scale-90"
+                        className="absolute top-5 right-5 p-3 bg-slate-950/40 backdrop-blur-xl text-white rounded-2xl hover:bg-slate-950 hover:scale-110 transition-all active:scale-90 shadow-xl"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-5 h-5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
                   )}
 
-                  <div className="mt-6 flex items-center justify-between border-t border-slate-50 dark:border-slate-900 pt-5">
-                    <div className="flex gap-3">
+                  <div className="mt-8 flex items-center justify-between border-t border-slate-100 dark:border-slate-900 pt-6">
+                    <div className="flex gap-4">
                       <button 
                         onClick={generateAiContent}
                         disabled={isGenerating || !newPostText}
-                        className={`p-3 rounded-2xl transition-all ${isGenerating ? 'animate-pulse bg-brand-100 dark:bg-brand-900/50 text-brand-600' : 'hover:bg-brand-50 dark:hover:bg-brand-950/30 text-brand-600 dark:text-brand-400'}`}
-                        title="AI Enhance"
+                        className={`p-3.5 rounded-2xl transition-all border border-transparent ${isGenerating ? 'animate-pulse bg-brand-50 dark:bg-brand-900/40 text-brand-600' : 'hover:bg-brand-50 dark:hover:bg-brand-900/30 text-brand-600 dark:text-brand-400 hover:border-brand-200 dark:hover:border-brand-800'}`}
+                        title="Enhance Draft"
                       >
                         <Icons.Sparkles />
                       </button>
                       <button 
                         onClick={generateAiImage}
                         disabled={isImageGenerating || !newPostText}
-                        className={`p-3 rounded-2xl transition-all ${isImageGenerating ? 'animate-pulse bg-purple-100 dark:bg-purple-900/50 text-purple-600' : 'hover:bg-purple-50 dark:hover:bg-purple-950/30 text-purple-600 dark:text-purple-400'}`}
-                        title="Generate Image"
+                        className={`p-3.5 rounded-2xl transition-all border border-transparent ${isImageGenerating ? 'animate-pulse bg-purple-50 dark:bg-purple-900/40 text-purple-600' : 'hover:bg-purple-50 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800'}`}
+                        title="AI Image"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-6 h-6">
                           <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                         </svg>
                       </button>
@@ -188,9 +197,12 @@ const App: React.FC = () => {
                     <button 
                       onClick={handlePost}
                       disabled={!newPostText.trim() && !generatedImage}
-                      className="bg-brand-600 dark:bg-brand-500 disabled:opacity-50 text-white font-black px-8 py-3 rounded-full hover:bg-brand-700 dark:hover:bg-brand-600 transition-all shadow-xl shadow-brand-200 dark:shadow-none active:scale-95 text-lg"
+                      className="bg-brand-600 dark:bg-brand-500 disabled:opacity-40 text-white font-black px-10 py-4 rounded-full hover:bg-brand-700 dark:hover:bg-brand-600 transition-all shadow-xl shadow-brand-200 dark:shadow-none active:scale-95 text-lg flex items-center gap-2 group"
                     >
                       Post
+                      <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -200,12 +212,15 @@ const App: React.FC = () => {
             {/* Feed */}
             <div className="flex flex-col bg-white dark:bg-slate-950 min-h-screen">
               {posts.length === 0 ? (
-                <div className="p-20 text-center text-slate-400 dark:text-slate-600">
-                  <div className="w-24 h-24 bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border border-slate-100 dark:border-slate-800">
-                    <Icons.Home />
+                <div className="p-24 text-center">
+                  <div className="w-32 h-32 bg-slate-50 dark:bg-slate-900 rounded-[3rem] flex items-center justify-center mx-auto mb-10 border-4 border-white dark:border-slate-800 shadow-premium">
+                    <div className="text-brand-500 scale-[2]">
+                      <Icons.Home />
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-black text-slate-800 dark:text-slate-200">Silence is over.</h3>
-                  <p className="mt-3 text-lg font-medium">Start the conversation on Blue today.</p>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Your timeline is quiet.</h3>
+                  <p className="mt-4 text-slate-500 dark:text-slate-400 text-lg font-medium max-w-sm mx-auto leading-relaxed">Join the conversation and be the first to share something amazing!</p>
+                  <button onClick={() => window.scrollTo({top:0, behavior:'smooth'})} className="mt-8 text-brand-600 dark:text-brand-400 font-black tracking-wider uppercase text-xs hover:underline">Start Posting</button>
                 </div>
               ) : (
                 posts.map(post => <PostCard key={post.id} post={post} />)
@@ -216,20 +231,26 @@ const App: React.FC = () => {
 
       case AppTab.EXPLORE:
         return (
-          <div className="p-6 dark:bg-slate-950 min-h-screen">
-            <h1 className="text-3xl font-black mb-6 dark:text-white tracking-tight">Explore</h1>
-            <div className="relative mb-8 group">
-               <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors"><Icons.Search /></span>
+          <div className="p-8 dark:bg-slate-950 min-h-screen">
+            <h1 className="text-4xl font-[900] mb-8 dark:text-white tracking-tighter">Explore</h1>
+            <div className="relative mb-10 group max-w-2xl">
+               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-all scale-110"><Icons.Search /></span>
                <input 
                 type="text" 
-                placeholder="Search the Blue verse" 
-                className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-full py-4 pl-14 pr-6 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 text-lg transition-all dark:text-white"
+                placeholder="Search the Blue Verse..." 
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] py-5 pl-16 pr-8 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 text-xl transition-all dark:text-white shadow-sm font-medium"
                />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {[1,2,3,4,5,6,7,8,9].map(i => (
-                <div key={i} className="aspect-square rounded-3xl overflow-hidden bg-slate-200 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-sm">
-                  <img src={`https://picsum.photos/id/${i+120}/600/600`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-pointer" alt="Explore" />
+                <div key={i} className="aspect-square rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-800 border-4 border-white dark:border-slate-900 shadow-premium group relative">
+                  <img src={`https://picsum.photos/id/${i+140}/800/800`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1 cursor-pointer" alt="Explore" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all text-white font-black text-sm tracking-widest uppercase">
+                      View
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -242,78 +263,74 @@ const App: React.FC = () => {
       case AppTab.PROFILE:
         return (
           <div className="flex flex-col dark:bg-slate-950 min-h-screen">
-            <div className="h-56 bg-slate-200 dark:bg-slate-800 relative">
+            <div className="h-64 bg-slate-200 dark:bg-slate-800 relative">
               <img src={currentUser.banner} className="w-full h-full object-cover" alt="Banner" />
-              <div className="absolute -bottom-16 left-6 ring-8 ring-white dark:ring-slate-950 rounded-full overflow-hidden w-36 h-36 bg-slate-200 dark:bg-slate-800 shadow-2xl">
-                <img src={currentUser.avatar} className="w-full h-full object-cover transition-transform hover:scale-110 duration-500" alt="Profile" />
+              <div className="absolute -bottom-16 left-8 ring-[10px] ring-white dark:ring-slate-950 rounded-[3rem] overflow-hidden w-40 h-40 bg-slate-200 dark:bg-slate-800 shadow-premium group cursor-pointer">
+                <img src={currentUser.avatar} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="Profile" />
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                   <Icons.Camera />
+                </div>
               </div>
             </div>
-            <div className="pt-20 px-6 pb-6 border-b border-slate-100 dark:border-slate-900">
+            <div className="pt-24 px-8 pb-8 border-b border-slate-100 dark:border-slate-900">
               <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{currentUser.name}</h2>
-                  <p className="text-slate-500 dark:text-slate-500 font-bold text-lg">{currentUser.handle}</p>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-4xl font-[900] text-slate-900 dark:text-white tracking-tighter truncate">{currentUser.name}</h2>
+                  <p className="text-slate-400 dark:text-slate-500 font-black text-xl tracking-tight mt-1">{currentUser.handle}</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                   <button 
                     onClick={() => setActiveTab(AppTab.SETTINGS)}
-                    className="p-3 border-2 border-slate-200 dark:border-slate-800 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 transition-all active:scale-95"
+                    className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-all active:scale-95 shadow-sm border border-slate-200/50 dark:border-slate-800"
                   >
                     <Icons.Settings />
                   </button>
                   <button 
                     onClick={() => setShowEditModal(true)}
-                    className="border-2 border-slate-200 dark:border-slate-800 px-8 py-3 rounded-full font-black text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center gap-2.5 active:scale-95 shadow-sm"
+                    className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 px-8 py-3 rounded-full font-black text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-3 active:scale-95 shadow-premium"
                   >
                     <Icons.Edit />
                     Edit Profile
                   </button>
                 </div>
               </div>
-              <p className="mt-5 text-slate-800 dark:text-slate-300 leading-relaxed max-w-xl text-lg font-medium">{currentUser.bio}</p>
+              <p className="mt-6 text-slate-700 dark:text-slate-300 leading-relaxed max-w-2xl text-[1.1rem] font-medium">{currentUser.bio}</p>
               
-              <div className="flex flex-wrap gap-x-6 gap-y-2 mt-5 text-sm font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
+              <div className="flex flex-wrap gap-x-8 gap-y-3 mt-6 text-xs font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.15em]">
                  {currentUser.location && (
-                   <span className="flex items-center gap-1.5">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                      </svg>
+                   <span className="flex items-center gap-2">
+                     <svg className="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                      {currentUser.location}
                    </span>
                  )}
                  {currentUser.website && (
-                    <a href={`https://${currentUser.website}`} target="_blank" className="text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                      </svg>
+                    <a href={`https://${currentUser.website}`} target="_blank" className="text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" /></svg>
                       {currentUser.website}
                     </a>
                  )}
-                 <span className="flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                    </svg>
+                 <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Joined {currentUser.joinDate}
                  </span>
               </div>
 
-              <div className="flex gap-6 mt-6">
-                <button className="text-base hover:underline"><span className="font-black text-slate-900 dark:text-white">{currentUser.following}</span> <span className="text-slate-500 font-bold">Following</span></button>
-                <button className="text-base hover:underline"><span className="font-black text-slate-900 dark:text-white">{currentUser.followers}</span> <span className="text-slate-500 font-bold">Followers</span></button>
+              <div className="flex gap-8 mt-8">
+                <button className="text-lg hover:underline"><span className="font-black text-slate-900 dark:text-white">{currentUser.following}</span> <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">Following</span></button>
+                <button className="text-lg hover:underline"><span className="font-black text-slate-900 dark:text-white">{currentUser.followers}</span> <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">Followers</span></button>
               </div>
             </div>
-            <div className="flex border-b border-slate-100 dark:border-slate-900 sticky top-16 glass z-10">
+            <div className="flex border-b border-slate-100 dark:border-slate-900 sticky top-[70px] glass z-10 no-scrollbar overflow-x-auto">
                {['Posts', 'Replies', 'Media', 'Likes'].map((tab, idx) => (
-                 <button key={tab} className={`flex-1 py-5 text-sm font-black tracking-widest uppercase transition-all ${idx === 0 ? 'border-b-4 border-brand-600 text-brand-600 dark:text-brand-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
+                 <button key={tab} className={`flex-1 py-6 text-[11px] font-black tracking-[0.2em] uppercase transition-all min-w-[100px] ${idx === 0 ? 'border-b-4 border-brand-600 text-brand-600 dark:text-brand-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
                    {tab}
                  </button>
                ))}
             </div>
-            <div className="flex flex-col bg-white dark:bg-slate-950 pb-20">
+            <div className="flex flex-col bg-white dark:bg-slate-950 pb-24">
               {posts.filter(p => p.userId === currentUser.id).length === 0 ? (
-                 <div className="p-20 text-center text-slate-400 dark:text-slate-600">
-                    <p className="text-lg font-bold">Your story hasn't started yet.</p>
+                 <div className="p-24 text-center opacity-40">
+                    <p className="text-xl font-black italic tracking-tight">Your digital footprint starts here.</p>
                  </div>
               ) : (
                 posts.filter(p => p.userId === currentUser.id).map(post => (
@@ -325,15 +342,15 @@ const App: React.FC = () => {
         );
 
       default:
-        return <div>Tab not found</div>;
+        return <div className="p-20 text-center font-black opacity-30">404 - LOST IN THE BLUE</div>;
     }
   };
 
   return (
-    <div className={`min-h-screen bg-white dark:bg-slate-950 max-w-7xl mx-auto flex flex-col md:flex-row pb-16 md:pb-0 transition-colors duration-300`}>
+    <div className={`min-h-screen bg-[#f8fafc] dark:bg-slate-950 max-w-7xl mx-auto flex flex-col md:flex-row pb-16 md:pb-0 transition-colors duration-500`}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
       
-      <main className="flex-1 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 min-h-screen">
+      <main className="flex-1 border-r border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-950 min-h-screen shadow-sm">
         {renderContent()}
       </main>
 
@@ -351,9 +368,11 @@ const App: React.FC = () => {
       {/* Mobile FAB for posting */}
       <button 
         onClick={() => { setActiveTab(AppTab.HOME); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-        className="fixed bottom-24 right-6 w-16 h-16 bg-brand-600 dark:bg-brand-500 text-white rounded-[1.75rem] flex items-center justify-center shadow-2xl md:hidden transition-all active:scale-90 z-50 border-4 border-white dark:border-slate-900"
+        className="fixed bottom-28 right-8 w-16 h-16 bg-brand-600 dark:bg-brand-500 text-white rounded-[1.75rem] flex items-center justify-center shadow-2xl md:hidden transition-all active:scale-90 z-50 border-4 border-white dark:border-slate-900 group"
       >
-        <Icons.Plus />
+        <div className="group-hover:rotate-90 transition-transform duration-300">
+          <Icons.Plus />
+        </div>
       </button>
     </div>
   );
