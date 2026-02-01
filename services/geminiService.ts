@@ -100,10 +100,7 @@ export class GeminiService {
       }));
     } catch (error) {
       console.error("Trending Error:", error);
-      return [
-        { topic: "Blue AI", summary: "AI-integrated social media is the new frontier.", links: [] },
-        { topic: "Remote Work", summary: "The debate on returning to office continues globally.", links: [] }
-      ];
+      return [];
     }
   }
 }

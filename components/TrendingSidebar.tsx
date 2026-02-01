@@ -39,7 +39,7 @@ const TrendingSidebar: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : (
+        ) : trends.length > 0 ? (
           <div className="space-y-10">
             {trends.map((trend, i) => (
               <div key={i} className="group cursor-pointer">
@@ -81,32 +81,13 @@ const TrendingSidebar: React.FC = () => {
               </div>
             ))}
           </div>
+        ) : (
+          <div className="text-center py-4 text-slate-400 dark:text-slate-600 font-bold text-sm">
+            Everything is quiet right now.
+          </div>
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-900/50 rounded-[2.5rem] p-7 border border-slate-200/60 dark:border-slate-800 shadow-premium">
-        <h2 className="text-xl font-black mb-6 text-slate-900 dark:text-white tracking-tighter">Who to Follow</h2>
-        <div className="space-y-7">
-          {[
-            { name: 'Gemini AI', handle: '@googleai', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=gemini' },
-            { name: 'Blue Team', handle: '@teamblue', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=blue' }
-          ].map((u, i) => (
-            <div key={i} className="flex items-center justify-between group">
-              <div className="flex items-center gap-3.5">
-                <img src={u.avatar} className="w-12 h-12 rounded-full ring-2 ring-slate-100 dark:ring-slate-800 transition-transform group-hover:scale-105 bg-slate-50 dark:bg-slate-800" alt={u.name} />
-                <div className="text-sm">
-                  <p className="font-extrabold text-slate-900 dark:text-white">{u.name}</p>
-                  <p className="text-slate-500 dark:text-slate-500 font-bold tracking-tight">{u.handle}</p>
-                </div>
-              </div>
-              <button className="bg-slate-900 dark:bg-brand-500 text-white dark:text-white text-xs font-black px-6 py-2.5 rounded-full hover:scale-105 hover:bg-black dark:hover:bg-brand-600 transition-all active:scale-95 shadow-lg shadow-slate-200 dark:shadow-none">
-                Follow
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-      
       <div className="mt-10 px-6 text-[10px] text-slate-400 dark:text-slate-600 font-black flex flex-wrap gap-x-5 gap-y-3 uppercase tracking-[0.2em] mb-10">
         <span className="hover:text-brand-500 transition-colors cursor-pointer">Terms</span>
         <span className="hover:text-brand-500 transition-colors cursor-pointer">Privacy</span>

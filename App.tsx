@@ -64,7 +64,7 @@ const App: React.FC = () => {
     setCurrentUser({
       ...user,
       joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      banner: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=60'
+      banner: undefined
     });
   };
 
@@ -242,17 +242,9 @@ const App: React.FC = () => {
                />
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {[1,2,3,4,5,6,7,8,9].map(i => (
-                <div key={i} className="aspect-square rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-800 border-4 border-white dark:border-slate-900 shadow-premium group relative">
-                  <img src={`https://picsum.photos/id/${i+140}/800/800`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1 cursor-pointer" alt="Explore" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all text-white font-black text-sm tracking-widest uppercase">
-                      View
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="flex flex-col items-center justify-center p-20 text-center opacity-40">
+              <Icons.Search />
+              <h3 className="mt-4 text-xl font-black italic tracking-tight">Search for trending topics and people.</h3>
             </div>
           </div>
         );
@@ -264,7 +256,7 @@ const App: React.FC = () => {
         return (
           <div className="flex flex-col dark:bg-slate-950 min-h-screen">
             <div className="h-64 bg-slate-200 dark:bg-slate-800 relative">
-              <img src={currentUser.banner} className="w-full h-full object-cover" alt="Banner" />
+              {currentUser.banner && <img src={currentUser.banner} className="w-full h-full object-cover" alt="Banner" />}
               <div className="absolute -bottom-16 left-8 ring-[10px] ring-white dark:ring-slate-950 rounded-[3rem] overflow-hidden w-40 h-40 bg-slate-200 dark:bg-slate-800 shadow-premium group cursor-pointer">
                 <img src={currentUser.avatar} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="Profile" />
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -310,7 +302,7 @@ const App: React.FC = () => {
                     </a>
                  )}
                  <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2V7" /></svg>
                     Joined {currentUser.joinDate}
                  </span>
               </div>
