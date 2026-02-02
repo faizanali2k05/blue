@@ -8,13 +8,11 @@ import TrendingSidebar from './components/TrendingSidebar';
 import Auth from './components/Auth';
 import EditProfileModal from './components/EditProfileModal';
 import SettingsView from './components/SettingsView';
-import { GeminiService } from './services/geminiService';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<UserSettings>({
     darkMode: false,
-    aiAutoEnhance: true,
     emailNotifications: true,
     pushNotifications: true,
     contentFilter: 'standard'
@@ -22,11 +20,10 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.HOME);
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPostText, setNewPostText] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isImageGenerating, setIsImageGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [profileViewMode, setProfileViewMode] = useState<'grid' | 'list'>('grid');
+  const [followingIds, setFollowingIds] = useState<string[]>([]);
 
   // Initialize Auth & Data
   useEffect(() => {
@@ -39,17 +36,24 @@ const App: React.FC = () => {
     const savedSettings = localStorage.getItem('blue_settings');
     if (savedSettings) setSettings(JSON.parse(savedSettings));
 
+    const savedFollowing = localStorage.getItem('blue_following');
+    if (savedFollowing) setFollowingIds(JSON.parse(savedFollowing));
+
     setTimeout(() => setIsLoading(false), 800);
   }, []);
 
   // Save data to localStorage
   useEffect(() => {
-    if (posts.length > 0) localStorage.setItem('blue_posts', JSON.stringify(posts));
+    localStorage.setItem('blue_posts', JSON.stringify(posts));
   }, [posts]);
 
   useEffect(() => {
     if (currentUser) localStorage.setItem('blue_user', JSON.stringify(currentUser));
   }, [currentUser]);
+
+  useEffect(() => {
+    localStorage.setItem('blue_following', JSON.stringify(followingIds));
+  }, [followingIds]);
 
   useEffect(() => {
     localStorage.setItem('blue_settings', JSON.stringify(settings));
@@ -64,7 +68,6 @@ const App: React.FC = () => {
     setCurrentUser({
       ...user,
       joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      banner: undefined
     });
   };
 
@@ -81,8 +84,8 @@ const App: React.FC = () => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
-  const handlePost = () => {
-    if (!currentUser || (!newPostText.trim() && !generatedImage)) return;
+  const handlePost = (imageUrl?: string) => {
+    if (!currentUser || (!newPostText.trim() && !imageUrl)) return;
 
     const newPost: Post = {
       id: Date.now().toString(),
@@ -95,40 +98,23 @@ const App: React.FC = () => {
       likes: 0,
       comments: 0,
       reblues: 0,
-      image: generatedImage || undefined,
-      isAiGenerated: isGenerating || isImageGenerating
+      image: imageUrl
     };
 
     setPosts([newPost, ...posts]);
     setNewPostText('');
-    setGeneratedImage(null);
   };
 
-  const generateAiContent = async () => {
-    if (!newPostText) return;
-    setIsGenerating(true);
-    const gemini = GeminiService.getInstance();
-    const result = await gemini.generatePostContent(newPostText);
-    setNewPostText(result);
-    setIsGenerating(false);
-  };
-
-  const generateAiImage = async () => {
-    if (!newPostText) return;
-    setIsImageGenerating(true);
-    const gemini = GeminiService.getInstance();
-    const img = await gemini.generatePostImage(newPostText);
-    setGeneratedImage(img);
-    setIsImageGenerating(false);
+  const toggleFollow = (userId: string) => {
+    setFollowingIds(prev => 
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
   };
 
   if (isLoading) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
-      <div className="w-16 h-16 bg-brand-600 rounded-[1.5rem] flex items-center justify-center shadow-2xl animate-bounce mb-6">
-        <span className="text-white font-black text-3xl">B</span>
-      </div>
-      <div className="w-48 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-        <div className="h-full bg-brand-500 w-1/2 animate-[shimmer_2s_infinite_linear] rounded-full"></div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950">
+      <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-xl flex items-center justify-center animate-pulse">
+        <span className="text-white dark:text-black font-black italic text-xl">B</span>
       </div>
     </div>
   );
@@ -139,88 +125,40 @@ const App: React.FC = () => {
     switch (activeTab) {
       case AppTab.HOME:
         return (
-          <div className="flex flex-col dark:bg-slate-950">
-            <header className="sticky top-0 z-40 h-[70px] glass border-b border-slate-100 dark:border-slate-800/50 px-8 flex items-center justify-between">
-              <h1 className="text-2xl font-[900] tracking-tighter text-slate-900 dark:text-white">Home</h1>
-              <div className="md:hidden w-10 h-10 rounded-xl overflow-hidden shadow-premium border-2 border-white dark:border-slate-800" onClick={() => setActiveTab(AppTab.PROFILE)}>
-                <img src={currentUser.avatar} alt="Me" className="w-full h-full object-cover" />
-              </div>
-            </header>
-
-            {/* Post Composer */}
-            <div className="p-8 border-b border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950">
-              <div className="flex gap-5">
-                <img src={currentUser.avatar} className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800 shadow-sm" alt="Me" />
-                <div className="flex-1">
-                  <textarea
-                    value={newPostText}
-                    onChange={(e) => setNewPostText(e.target.value)}
-                    placeholder="What's your story?"
-                    className="w-full bg-transparent border-none focus:ring-0 text-xl resize-none placeholder-slate-400 dark:placeholder-slate-600 min-h-[120px] dark:text-slate-100 font-medium tracking-tight"
-                  />
-                  
-                  {generatedImage && (
-                    <div className="relative mt-6 rounded-[2.5rem] overflow-hidden border border-slate-200 dark:border-slate-800 group shadow-premium ring-4 ring-slate-50 dark:ring-slate-900">
-                      <img src={generatedImage} alt="AI Generated" className="w-full h-auto" />
-                      <button 
-                        onClick={() => setGeneratedImage(null)}
-                        className="absolute top-5 right-5 p-3 bg-slate-950/40 backdrop-blur-xl text-white rounded-2xl hover:bg-slate-950 hover:scale-110 transition-all active:scale-90 shadow-xl"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-5 h-5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="mt-8 flex items-center justify-between border-t border-slate-100 dark:border-slate-900 pt-6">
-                    <div className="flex gap-4">
-                      <button 
-                        onClick={generateAiContent}
-                        disabled={isGenerating || !newPostText}
-                        className={`p-3.5 rounded-2xl transition-all border border-transparent ${isGenerating ? 'animate-pulse bg-brand-50 dark:bg-brand-900/40 text-brand-600' : 'hover:bg-brand-50 dark:hover:bg-brand-900/30 text-brand-600 dark:text-brand-400 hover:border-brand-200 dark:hover:border-brand-800'}`}
-                        title="Enhance Draft"
-                      >
-                        <Icons.Sparkles />
-                      </button>
-                      <button 
-                        onClick={generateAiImage}
-                        disabled={isImageGenerating || !newPostText}
-                        className={`p-3.5 rounded-2xl transition-all border border-transparent ${isImageGenerating ? 'animate-pulse bg-purple-50 dark:bg-purple-900/40 text-purple-600' : 'hover:bg-purple-50 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800'}`}
-                        title="AI Image"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-6 h-6">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                        </svg>
-                      </button>
-                    </div>
-                    <button 
-                      onClick={handlePost}
-                      disabled={!newPostText.trim() && !generatedImage}
-                      className="bg-brand-600 dark:bg-brand-500 disabled:opacity-40 text-white font-black px-10 py-4 rounded-full hover:bg-brand-700 dark:hover:bg-brand-600 transition-all shadow-xl shadow-brand-200 dark:shadow-none active:scale-95 text-lg flex items-center gap-2 group"
-                    >
-                      Post
-                      <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </button>
+          <div className="max-w-[600px] mx-auto flex flex-col pt-4">
+            {/* Stories Bar */}
+            <div className="flex gap-4 px-4 overflow-x-auto no-scrollbar py-2 border-b border-slate-100 dark:border-slate-900 mb-2">
+              <div className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group">
+                <div className="w-16 h-16 rounded-full p-1 bg-gradient-to-tr from-yellow-400 to-fuchsia-600 transition-transform group-hover:scale-105 active:scale-95">
+                  <div className="w-full h-full rounded-full border-2 border-white dark:border-slate-950 overflow-hidden bg-slate-200">
+                    <img src={currentUser.avatar} alt="Me" className="w-full h-full object-cover" />
                   </div>
                 </div>
+                <span className="text-[11px] font-bold dark:text-white truncate w-16 text-center">Your Story</span>
               </div>
+              {/* Only show stories for users actually followed */}
+              {followingIds.map(id => (
+                <div key={id} className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group">
+                   <div className="w-16 h-16 rounded-full p-1 bg-gradient-to-tr from-yellow-400 to-fuchsia-600">
+                    <div className="w-full h-full rounded-full border-2 border-white dark:border-slate-950 overflow-hidden bg-slate-200">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`} alt="User" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold dark:text-white truncate w-16 text-center">User_{id.slice(0,3)}</span>
+                </div>
+              ))}
             </div>
 
             {/* Feed */}
-            <div className="flex flex-col bg-white dark:bg-slate-950 min-h-screen">
+            <div className="flex flex-col pb-20">
               {posts.length === 0 ? (
-                <div className="p-24 text-center">
-                  <div className="w-32 h-32 bg-slate-50 dark:bg-slate-900 rounded-[3rem] flex items-center justify-center mx-auto mb-10 border-4 border-white dark:border-slate-800 shadow-premium">
-                    <div className="text-brand-500 scale-[2]">
-                      <Icons.Home />
-                    </div>
+                <div className="p-20 text-center flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-full border-2 border-slate-900 dark:border-white flex items-center justify-center mb-6">
+                    <Icons.Camera />
                   </div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Your timeline is quiet.</h3>
-                  <p className="mt-4 text-slate-500 dark:text-slate-400 text-lg font-medium max-w-sm mx-auto leading-relaxed">Join the conversation and be the first to share something amazing!</p>
-                  <button onClick={() => window.scrollTo({top:0, behavior:'smooth'})} className="mt-8 text-brand-600 dark:text-brand-400 font-black tracking-wider uppercase text-xs hover:underline">Start Posting</button>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Share Photos</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm max-w-[240px]">When you share photos, they will appear on your profile.</p>
+                  <button onClick={() => window.scrollTo({top:0, behavior:'smooth'})} className="mt-6 text-brand-600 font-bold">Share your first photo</button>
                 </div>
               ) : (
                 posts.map(post => <PostCard key={post.id} post={post} />)
@@ -231,122 +169,119 @@ const App: React.FC = () => {
 
       case AppTab.EXPLORE:
         return (
-          <div className="p-8 dark:bg-slate-950 min-h-screen">
-            <h1 className="text-4xl font-[900] mb-8 dark:text-white tracking-tighter">Explore</h1>
-            <div className="relative mb-10 group max-w-2xl">
-               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-all scale-110"><Icons.Search /></span>
-               <input 
+          <div className="p-4 md:p-8 max-w-4xl mx-auto">
+            <div className="relative mb-8">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icons.Search /></span>
+              <input 
                 type="text" 
-                placeholder="Search the Blue Verse..." 
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] py-5 pl-16 pr-8 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 text-xl transition-all dark:text-white shadow-sm font-medium"
-               />
+                placeholder="Search" 
+                className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-3 pl-12 pr-4 focus:ring-0 text-sm dark:text-white"
+              />
             </div>
-            
-            <div className="flex flex-col items-center justify-center p-20 text-center opacity-40">
-              <Icons.Search />
-              <h3 className="mt-4 text-xl font-black italic tracking-tight">Search for trending topics and people.</h3>
+            {/* Removed dummy picsum images grid. Only show real content if available. */}
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                <Icons.Search />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Search the Blue Community</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Discover new people and ideas.</p>
             </div>
+          </div>
+        );
+
+      case AppTab.PROFILE:
+        return (
+          <div className="max-w-4xl mx-auto pt-8 px-4 flex flex-col pb-20">
+            <header className="flex gap-8 items-start mb-12">
+              <div className="w-20 h-20 md:w-40 md:h-40 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800">
+                <img src={currentUser.avatar} alt="Profile" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 flex flex-col">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+                  <h2 className="text-xl font-medium text-slate-900 dark:text-white">{currentUser.handle}</h2>
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowEditModal(true)} className="px-4 py-1.5 bg-slate-100 dark:bg-slate-800 text-sm font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Edit profile</button>
+                    <button onClick={() => setActiveTab(AppTab.SETTINGS)} className="p-2 text-slate-900 dark:text-white"><Icons.Settings /></button>
+                  </div>
+                </div>
+                <div className="hidden md:flex gap-10 mb-6">
+                  <span className="text-sm"><b className="text-slate-900 dark:text-white">{posts.filter(p => p.userId === currentUser.id).length}</b> posts</span>
+                  <span className="text-sm"><b className="text-slate-900 dark:text-white">{currentUser.followers}</b> followers</span>
+                  <span className="text-sm"><b className="text-slate-900 dark:text-white">{followingIds.length}</b> following</span>
+                </div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">{currentUser.name}</div>
+                <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{currentUser.bio}</div>
+              </div>
+            </header>
+
+            <div className="md:hidden flex justify-around py-4 border-y border-slate-100 dark:border-slate-800 mb-4">
+                <div className="flex flex-col items-center"><span className="font-bold text-slate-900 dark:text-white">{posts.filter(p => p.userId === currentUser.id).length}</span><span className="text-xs text-slate-500">posts</span></div>
+                <div className="flex flex-col items-center"><span className="font-bold text-slate-900 dark:text-white">{currentUser.followers}</span><span className="text-xs text-slate-500">followers</span></div>
+                <div className="flex flex-col items-center"><span className="font-bold text-slate-900 dark:text-white">{followingIds.length}</span><span className="text-xs text-slate-500">following</span></div>
+            </div>
+
+            <div className="flex border-t border-slate-100 dark:border-slate-800 justify-center gap-16">
+                <button 
+                  onClick={() => setProfileViewMode('grid')}
+                  className={`py-4 flex items-center gap-2 uppercase tracking-widest text-xs font-bold transition-all ${profileViewMode === 'grid' ? 'border-t-2 border-slate-900 dark:border-white text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                  Posts
+                </button>
+                <button 
+                  onClick={() => setProfileViewMode('list')}
+                  className={`py-4 flex items-center gap-2 uppercase tracking-widest text-xs font-bold transition-all ${profileViewMode === 'list' ? 'border-t-2 border-slate-900 dark:border-white text-slate-900 dark:text-white' : 'text-slate-400'}`}
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5h3v3H5zM10 5h3v3h-3zM15 5h3v3h-3zM5 10h3v3H5zM10 10h3v3h-3zM15 10h3v3h-3zM5 15h3v3H5zM10 15h3v3h-3zM15 15h3v3h-3z" /></svg>
+                  Tagged
+                </button>
+            </div>
+
+            {profileViewMode === 'grid' ? (
+              <div className="grid grid-cols-3 gap-1">
+                {posts.filter(p => p.userId === currentUser.id).length > 0 ? (
+                  posts.filter(p => p.userId === currentUser.id).map(post => (
+                    <div key={post.id} className="aspect-square bg-slate-100 dark:bg-slate-900 overflow-hidden relative group cursor-pointer">
+                      {post.image ? <img src={post.image} className="w-full h-full object-cover" alt="My post" /> : <div className="p-4 flex items-center justify-center text-xs italic">{post.content}</div>}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white font-bold">
+                         <span className="flex items-center gap-1"><Icons.Heart filled={true} /> {post.likes}</span>
+                         <span className="flex items-center gap-1"><Icons.Comment /> {post.comments}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-3 py-20 text-center text-slate-400 font-medium">No posts yet.</div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 opacity-50">
+                <div className="w-16 h-16 border-2 border-slate-900 dark:border-white rounded-full flex items-center justify-center mb-4">
+                  <Icons.Profile />
+                </div>
+                <h3 className="text-xl font-bold dark:text-white">Photos of you</h3>
+                <p className="text-sm text-slate-500">When people tag you in photos, they'll appear here.</p>
+              </div>
+            )}
           </div>
         );
 
       case AppTab.SETTINGS:
         return <SettingsView settings={settings} onUpdate={updateSettings} />;
 
-      case AppTab.PROFILE:
-        return (
-          <div className="flex flex-col dark:bg-slate-950 min-h-screen">
-            <div className="h-64 bg-slate-200 dark:bg-slate-800 relative">
-              {currentUser.banner && <img src={currentUser.banner} className="w-full h-full object-cover" alt="Banner" />}
-              <div className="absolute -bottom-16 left-8 ring-[10px] ring-white dark:ring-slate-950 rounded-[3rem] overflow-hidden w-40 h-40 bg-slate-200 dark:bg-slate-800 shadow-premium group cursor-pointer">
-                <img src={currentUser.avatar} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="Profile" />
-                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                   <Icons.Camera />
-                </div>
-              </div>
-            </div>
-            <div className="pt-24 px-8 pb-8 border-b border-slate-100 dark:border-slate-900">
-              <div className="flex justify-between items-start">
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-4xl font-[900] text-slate-900 dark:text-white tracking-tighter truncate">{currentUser.name}</h2>
-                  <p className="text-slate-400 dark:text-slate-500 font-black text-xl tracking-tight mt-1">{currentUser.handle}</p>
-                </div>
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => setActiveTab(AppTab.SETTINGS)}
-                    className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-all active:scale-95 shadow-sm border border-slate-200/50 dark:border-slate-800"
-                  >
-                    <Icons.Settings />
-                  </button>
-                  <button 
-                    onClick={() => setShowEditModal(true)}
-                    className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 px-8 py-3 rounded-full font-black text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-3 active:scale-95 shadow-premium"
-                  >
-                    <Icons.Edit />
-                    Edit Profile
-                  </button>
-                </div>
-              </div>
-              <p className="mt-6 text-slate-700 dark:text-slate-300 leading-relaxed max-w-2xl text-[1.1rem] font-medium">{currentUser.bio}</p>
-              
-              <div className="flex flex-wrap gap-x-8 gap-y-3 mt-6 text-xs font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.15em]">
-                 {currentUser.location && (
-                   <span className="flex items-center gap-2">
-                     <svg className="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                     {currentUser.location}
-                   </span>
-                 )}
-                 {currentUser.website && (
-                    <a href={`https://${currentUser.website}`} target="_blank" className="text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" /></svg>
-                      {currentUser.website}
-                    </a>
-                 )}
-                 <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2V7" /></svg>
-                    Joined {currentUser.joinDate}
-                 </span>
-              </div>
-
-              <div className="flex gap-8 mt-8">
-                <button className="text-lg hover:underline"><span className="font-black text-slate-900 dark:text-white">{currentUser.following}</span> <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">Following</span></button>
-                <button className="text-lg hover:underline"><span className="font-black text-slate-900 dark:text-white">{currentUser.followers}</span> <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">Followers</span></button>
-              </div>
-            </div>
-            <div className="flex border-b border-slate-100 dark:border-slate-900 sticky top-[70px] glass z-10 no-scrollbar overflow-x-auto">
-               {['Posts', 'Replies', 'Media', 'Likes'].map((tab, idx) => (
-                 <button key={tab} className={`flex-1 py-6 text-[11px] font-black tracking-[0.2em] uppercase transition-all min-w-[100px] ${idx === 0 ? 'border-b-4 border-brand-600 text-brand-600 dark:text-brand-400' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}>
-                   {tab}
-                 </button>
-               ))}
-            </div>
-            <div className="flex flex-col bg-white dark:bg-slate-950 pb-24">
-              {posts.filter(p => p.userId === currentUser.id).length === 0 ? (
-                 <div className="p-24 text-center opacity-40">
-                    <p className="text-xl font-black italic tracking-tight">Your digital footprint starts here.</p>
-                 </div>
-              ) : (
-                posts.filter(p => p.userId === currentUser.id).map(post => (
-                  <PostCard key={post.id} post={post} />
-                ))
-              )}
-            </div>
-          </div>
-        );
-
       default:
-        return <div className="p-20 text-center font-black opacity-30">404 - LOST IN THE BLUE</div>;
+        return <div>Tab not found</div>;
     }
   };
 
   return (
-    <div className={`min-h-screen bg-[#f8fafc] dark:bg-slate-950 max-w-7xl mx-auto flex flex-col md:flex-row pb-16 md:pb-0 transition-colors duration-500`}>
+    <div className={`min-h-screen bg-white dark:bg-slate-950 flex flex-col md:flex-row`}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
       
-      <main className="flex-1 border-r border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-950 min-h-screen shadow-sm">
+      <main className="flex-1 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 min-h-screen">
         {renderContent()}
       </main>
 
-      <TrendingSidebar />
+      <TrendingSidebar followingIds={followingIds} onFollow={toggleFollow} onUnfollow={toggleFollow} />
 
       {/* Modals */}
       {showEditModal && currentUser && (
@@ -357,14 +292,19 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Mobile FAB for posting */}
+      {/* Floating Action for Creating Post */}
       <button 
-        onClick={() => { setActiveTab(AppTab.HOME); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-        className="fixed bottom-28 right-8 w-16 h-16 bg-brand-600 dark:bg-brand-500 text-white rounded-[1.75rem] flex items-center justify-center shadow-2xl md:hidden transition-all active:scale-90 z-50 border-4 border-white dark:border-slate-900 group"
+        onClick={() => {
+          const content = prompt("What's on your mind?");
+          const img = prompt("Enter Image URL (optional):");
+          if (content || img) {
+            setNewPostText(content || "");
+            handlePost(img || undefined);
+          }
+        }}
+        className="fixed bottom-24 right-6 md:right-auto md:left-72 md:bottom-12 w-14 h-14 bg-brand-600 text-white rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-90 z-50 border-2 border-white dark:border-slate-950"
       >
-        <div className="group-hover:rotate-90 transition-transform duration-300">
-          <Icons.Plus />
-        </div>
+        <Icons.Plus />
       </button>
     </div>
   );

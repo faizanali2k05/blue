@@ -17,7 +17,6 @@ export interface User {
 
 export interface UserSettings {
   darkMode: boolean;
-  aiAutoEnhance: boolean;
   emailNotifications: boolean;
   pushNotifications: boolean;
   contentFilter: 'standard' | 'strict' | 'relaxed';
@@ -35,7 +34,6 @@ export interface Post {
   comments: number;
   reblues: number;
   image?: string;
-  isAiGenerated?: boolean;
 }
 
 export enum AppTab {
@@ -43,6 +41,5 @@ export enum AppTab {
   EXPLORE = 'explore',
   NOTIFICATIONS = 'notifications',
   PROFILE = 'profile',
-  AI_STUDIO = 'ai_studio',
   SETTINGS = 'settings'
 }

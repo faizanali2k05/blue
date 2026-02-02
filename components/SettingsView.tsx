@@ -20,75 +20,49 @@ const SettingsView: React.FC<SettingsViewProps> = ({ settings, onUpdate }) => {
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-12 dark:bg-slate-950 min-h-screen transition-colors duration-300">
       <header className="mb-10">
-        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Settings</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">Personalize your Blue experience.</p>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">Settings</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">Personalize your Blue experience.</p>
       </header>
 
       <section className="space-y-6">
-        <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-3">General</h2>
+        <h2 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] border-b border-slate-100 dark:border-slate-800 pb-3">Appearance</h2>
         <div className="space-y-8">
           <div className="flex items-center justify-between group">
             <div className="max-w-[70%]">
-              <p className="font-bold text-slate-900 dark:text-slate-200">Dark Mode</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Switch between light and dark themes.</p>
+              <p className="font-bold text-slate-900 dark:text-slate-200 text-sm">Dark Mode</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Switch between light and dark themes.</p>
             </div>
             <Toggle active={settings.darkMode} onClick={() => onUpdate({ darkMode: !settings.darkMode })} />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="max-w-[70%]">
-              <p className="font-bold text-slate-900 dark:text-slate-200">AI Auto-Enhance</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Let Gemini optimize your drafts for better engagement.</p>
-            </div>
-            <Toggle active={settings.aiAutoEnhance} onClick={() => onUpdate({ aiAutoEnhance: !settings.aiAutoEnhance })} />
           </div>
         </div>
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-3">Notifications</h2>
+        <h2 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] border-b border-slate-100 dark:border-slate-800 pb-3">Notifications</h2>
         <div className="space-y-8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-bold text-slate-900 dark:text-slate-200">Email Alerts</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Weekly summaries and important account news.</p>
+              <p className="font-bold text-slate-900 dark:text-slate-200 text-sm">Email Alerts</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Weekly summaries and important account news.</p>
             </div>
             <Toggle active={settings.emailNotifications} onClick={() => onUpdate({ emailNotifications: !settings.emailNotifications })} />
           </div>
           
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-bold text-slate-900 dark:text-slate-200">Push Notifications</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Instant updates for likes, comments, and reblues.</p>
+              <p className="font-bold text-slate-900 dark:text-slate-200 text-sm">Push Notifications</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Instant updates for likes, comments, and saves.</p>
             </div>
             <Toggle active={settings.pushNotifications} onClick={() => onUpdate({ pushNotifications: !settings.pushNotifications })} />
           </div>
         </div>
       </section>
 
-      <section className="space-y-6">
-        <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-3">Safety</h2>
-        <div className="space-y-4">
-          <p className="font-bold text-slate-900 dark:text-slate-200">Content Filtering</p>
-          <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-            {['Standard', 'Strict', 'Relaxed'].map(type => (
-              <button 
-                key={type}
-                onClick={() => onUpdate({ contentFilter: type.toLowerCase() as any })}
-                className={`py-3 text-sm font-bold rounded-xl transition-all ${settings.contentFilter === type.toLowerCase() ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <div className="pt-12 flex flex-col gap-4">
-        <button className="w-full py-5 bg-slate-50 dark:bg-slate-900 text-rose-600 dark:text-rose-500 font-extrabold rounded-3xl hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all border border-slate-200 dark:border-slate-800">
-          Deactivate Account
+        <button className="w-full py-4 text-rose-600 dark:text-rose-500 font-bold text-sm hover:underline">
+          Delete Account
         </button>
-        <p className="text-center text-sm text-slate-400 dark:text-slate-600 font-medium tracking-tight">Blue v1.2.4-beta • Built with Gemini</p>
+        <p className="text-center text-[10px] text-slate-300 dark:text-slate-700 font-black tracking-widest uppercase">Blue v2.0 • Pure Connection</p>
       </div>
     </div>
   );
